@@ -13,8 +13,13 @@ class Word {
   static int _lastId = 0;
 
   int get id => _id;
+  String get tag => "word-$_id";
 
-  Word({required this.word, required this.translation, required this.emoji})
+  Word(
+      {required this.word,
+      required this.translation,
+      required this.emoji,
+      int? score})
       : _id = _lastId++,
-        score = random.nextInt(200);
+        score = score ?? random.nextInt(200);
 }

@@ -1,11 +1,16 @@
-import 'package:google_fonts/google_fonts.dart';
+import "dart:math";
+
 import 'package:flutter/material.dart';
-import 'widgets/word_widget.dart';
-import 'widgets/dropees_input.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'models/word.dart';
+import 'pages/favorites_page.dart';
+import 'pages/main_page.dart';
+import 'widgets/drawer_content.dart';
+import 'widgets/dropees_input.dart';
 
 void main() {
-  runApp(DropeesApp());
+  runApp(const DropeesApp());
 }
 
 class DropeesApp extends StatelessWidget {
@@ -22,77 +27,153 @@ class DropeesApp extends StatelessWidget {
               color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 16.0),
         ),
       ),
-      home: const MyHomePage(title: 'Words'),
+      home: const MyHomePage(title: 'Слова'),
+      // home: GamePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
   final String title;
+
+  const MyHomePage({super.key, required this.title});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Word> words = [
+  int pageIndex = 0;
+
+  List<Word> words = [
     Word(word: "apple", translation: "яблуко", emoji: "🍏"),
     Word(word: "orange", translation: "помаранч", emoji: "🍊"),
+    Word(word: "pineapple", translation: "ананас", emoji: "🍍"),
+    Word(word: "peach", translation: "персик", emoji: "🍑"),
     Word(word: "pear", translation: "груша", emoji: "🍐")
   ];
+  Set<Word> likedWords = {};
 
-  final Set<Word> likedWords = {};
+  @override
+  void initState() {
+    super.initState();
+
+    // Add random word to liked on application load for demo purposes.
+    likedWords.add(randomWord());
+  }
+
+  Word randomWord() {
+    var random = Random();
+    int index = random.nextInt(words.length);
+
+    return words[index];
+  }
+
+  toggleLikedWord(Word word) {
+    setState(() {
+      if (likedWords.contains(word)) {
+        likedWords.remove(word);
+      } else {
+        likedWords.add(word);
+      }
+    });
+  }
+
+  removeWord(Word word) {
+    setState(() {
+      likedWords.remove(word);
+      words.remove(word);
+    });
+  }
+
+  void pageChanged(int i) {
+    setState(() {
+      pageIndex = i;
+    });
+  }
+
+  PageController pageController = PageController(
+    initialPage: 0,
+    keepPage: true,
+  );
+
+  Widget buildPageView() {
+    return PageView(
+      controller: pageController,
+      onPageChanged: (index) {
+        pageChanged(index);
+      },
+      children: <Widget>[
+        MainPage(
+            words: words,
+            likedWords: likedWords,
+            onLikePress: toggleLikedWord,
+            onDismissed: removeWord),
+        FavoritesPage(likedWords: likedWords, onLikePress: toggleLikedWord)
+      ],
+    );
+  }
+
+  List<BottomNavigationBarItem> buildBottomNavBarItems() => [
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.folder_open),
+          label: 'Усі слова',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.favorite_sharp),
+          label: 'Улюблені',
+        )
+      ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(85.0),
-          child: AppBar(
-            title: Text(
-              widget.title,
-              style: GoogleFonts.ubuntu(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple),
-            ),
+      drawer: Drawer(
+        child: Container(
+          color: Colors.pink,
+          padding: const EdgeInsets.all(20),
+          child: SafeArea(
+              child: DrawerContent(
+            words: words,
+            generateWord: randomWord,
+          )),
+        ),
+      ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(85.0),
+        child: AppBar(
+          title: Text(
+            widget.title,
+            style: GoogleFonts.ubuntu(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: const Color(0xFFDBE65B),
-          onPressed: _addWordDialog,
-          tooltip: 'Add new word',
-          shape: StadiumBorder(
-              side: BorderSide(color: Color(0xFFB953EA), width: 3)),
-          child: Icon(Icons.add_circle, color: Colors.deepPurple),
-        ),
-        backgroundColor: Colors.deepPurple,
-        body: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            child: Column(children: [
-              ...List.generate(
-                  words.length,
-                  (index) => Dismissible(
-                        key: Key(words[index].id.toString()),
-                        onDismissed: (direction) {
-                          setState(() {
-                            words.remove(words[index]);
-                          });
-                        },
-                        child: WordWidget(
-                            word: words[index].word,
-                            translation: words[index].translation,
-                            emoji: words[index].emoji,
-                            score: words[index].score,
-                            isLiked: likedWords.contains(words[index]),
-                            onLikePress: () => toggleLikedWord(words[index])),
-                      )),
-            ]),
-          ),
-        ));
+      ),
+      floatingActionButton: pageIndex == 0
+          ? FloatingActionButton(
+              backgroundColor: const Color(0xFFDBE65B),
+              onPressed: _addWordDialog,
+              tooltip: 'Додайте слово',
+              shape: const StadiumBorder(
+                  side: BorderSide(color: Color(0xFFB953EA), width: 3)),
+              child: const Icon(Icons.add_circle, color: Colors.deepPurple),
+            )
+          : null,
+      body: buildPageView(),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color.fromRGBO(41, 19, 57, 1),
+        unselectedItemColor: Colors.grey,
+        currentIndex: pageIndex,
+        onTap: (int i) => setState(() {
+          pageIndex = i;
+          pageController.animateToPage(pageIndex,
+              duration: const Duration(milliseconds: 500), curve: Curves.ease);
+        }),
+        items: buildBottomNavBarItems(),
+      ),
+    );
   }
 
   _addWordDialog() {
@@ -101,17 +182,17 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (BuildContext context) {
           String word = '';
           String translation = '';
-          String? emoji;
+          String emoji = '🤯';
 
           return AlertDialog(
-            shape: RoundedRectangleBorder(
+            shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10.0))),
             titleTextStyle: GoogleFonts.ubuntu(
               color: Colors.white,
               fontWeight: FontWeight.w900,
               fontSize: 20,
             ),
-            backgroundColor: Color(0xFF421A73),
+            backgroundColor: const Color(0xFF421A73),
             title: const Text(
               'Додайте слово',
             ),
@@ -163,7 +244,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     addWord(
                         newWord: word,
                         newTranslation: translation,
-                        newEmoji: emoji ?? '🤓');
+                        newEmoji: emoji);
                   },
                   child: Text(
                     'Зберегти',
@@ -186,16 +267,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       words.insert(0, newW);
-    });
-  }
-
-  toggleLikedWord(Word word) {
-    setState(() {
-      if (likedWords.contains(word)) {
-        likedWords.remove(word);
-      } else {
-        likedWords.add(word);
-      }
     });
   }
 }

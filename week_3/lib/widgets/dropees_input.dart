@@ -1,4 +1,3 @@
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
 class DropeesInput extends StatefulWidget {
@@ -7,14 +6,12 @@ class DropeesInput extends StatefulWidget {
   String hintText;
   Function(String)? onChanged;
 
-
   DropeesInput({
     Key? key,
     this.maxLength,
     required this.icon,
     required this.hintText,
-
-    Function(String)? this.onChanged,
+    this.onChanged,
   }) : super(key: key);
 
   @override
@@ -33,32 +30,32 @@ class _DropeesInputState extends State<DropeesInput> {
         });
       },
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 3.5),
+        margin: const EdgeInsets.symmetric(vertical: 3.5),
         child: TextField(
-          style: TextStyle(
+          style: const TextStyle(
               color: Colors.white, fontSize: 16.0, fontWeight: FontWeight.bold),
-          maxLength: this.widget.maxLength,
+          maxLength: widget.maxLength,
           decoration: InputDecoration(
             filled: true,
-            counter: Offstage(),
-            fillColor: Color(0xFF533181),
+            counter: const Offstage(),
+            fillColor: const Color(0xFF533181),
             prefixIcon: Icon(
-              this.widget.icon,
+              widget.icon,
               color: isFocused ? Colors.white : Colors.grey,
             ),
-            focusedBorder: OutlineInputBorder(
+            focusedBorder: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(50.0)),
                 borderSide: BorderSide.none),
-            enabledBorder: OutlineInputBorder(
+            enabledBorder: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(50.0)),
                 borderSide: BorderSide(
                   color: Color(0xFF62468E),
                   width: 3,
                 )),
             focusColor: Colors.white,
-            hintText: this.widget.hintText,
+            hintText: widget.hintText,
           ),
-          onChanged: this.widget.onChanged,
+          onChanged: widget.onChanged,
         ),
       ),
     );
