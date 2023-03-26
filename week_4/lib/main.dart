@@ -5,9 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'models/word.dart';
 import 'pages/favorites_page.dart';
+import 'pages/game.dart';
 import 'pages/main_page.dart';
 import 'widgets/drawer_content.dart';
 import 'widgets/dropees_input.dart';
+
+const MIN_GAME_QUESTIONS = 3;
 
 void main() {
   runApp(const DropeesApp());
@@ -19,6 +22,7 @@ class DropeesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Dropees',
       theme: ThemeData(
         primarySwatch: Colors.lime,
@@ -109,7 +113,9 @@ class _MyHomePageState extends State<MyHomePage> {
             likedWords: likedWords,
             onLikePress: toggleLikedWord,
             onDismissed: removeWord),
-        FavoritesPage(likedWords: likedWords, onLikePress: toggleLikedWord)
+        FavoritesPage(likedWords: likedWords, onLikePress: toggleLikedWord),
+        if (words.length >= MIN_GAME_QUESTIONS)
+          Game(numberOfQuestions: 10, generateWord: randomWord)
       ],
     );
   }
@@ -122,7 +128,12 @@ class _MyHomePageState extends State<MyHomePage> {
         const BottomNavigationBarItem(
           icon: Icon(Icons.favorite_sharp),
           label: 'Улюблені',
-        )
+        ),
+        if (words.length >= MIN_GAME_QUESTIONS)
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.stars),
+            label: 'ГРА',
+          )
       ];
 
   @override
