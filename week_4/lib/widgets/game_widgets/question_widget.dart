@@ -24,16 +24,16 @@ class QuestionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var containerDecoration =
-        BoxDecoration(color: Color.fromRGBO(33, 122, 209, 1));
+        const BoxDecoration(color: Color.fromRGBO(33, 122, 209, 1));
     switch (previousQuestionResult) {
       case true:
         containerDecoration =
-            BoxDecoration(color: Color.fromRGBO(98, 182, 86, 1.0));
+            const BoxDecoration(color: Color.fromRGBO(98, 182, 86, 1.0));
         break;
 
       case false:
         containerDecoration =
-            BoxDecoration(color: Color.fromRGBO(180, 83, 68, 1.0));
+            const BoxDecoration(color: Color.fromRGBO(180, 83, 68, 1.0));
         break;
     }
 

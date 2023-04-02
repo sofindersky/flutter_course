@@ -115,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
             onDismissed: removeWord),
         FavoritesPage(likedWords: likedWords, onLikePress: toggleLikedWord),
         if (words.length >= MIN_GAME_QUESTIONS)
-          Game(numberOfQuestions: 10, generateWord: randomWord)
+          Game(numberOfQuestions: 6, generateWord: randomWord)
       ],
     );
   }

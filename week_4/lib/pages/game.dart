@@ -1,88 +1,55 @@
+import 'package:dropees/models/game_model.dart';
 import 'package:dropees/widgets/game_widgets/game_over.dart';
+import 'package:dropees/widgets/game_widgets/question_widget.dart';
+import 'package:dropees/widgets/game_widgets/start_game.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/word.dart';
-import '../widgets/game_widgets/question_widget.dart';
-import '../widgets/game_widgets/start_game.dart';
 
-class Game extends StatefulWidget {
-  Word Function() generateWord;
-  int numberOfQuestions;
+class Game extends StatelessWidget {
+  final Word Function() generateWord;
+  final int numberOfQuestions;
 
-  Game({Key? key, required this.generateWord, required this.numberOfQuestions})
-      : super(key: key);
-
-  @override
-  State<Game> createState() => _GameState();
-}
-
-class _GameState extends State<Game> {
-  Word? randomWord1;
-  Word? randomWord2;
-  int score = 0;
-  bool isGameOver = false;
-  bool isGameStarted = false;
-  int counter = 0;
-  bool? questionResult;
-
-  @override
-  void initState() {
-    super.initState();
-
-    generateWordsPair();
-  }
-
-  void generateWordsPair() {
-    randomWord1 = widget.generateWord();
-    randomWord2 = widget.generateWord();
-  }
-
-  void checkQuestionResult(bool selectedResult) {
-    setState(() {
-      var wordsMatch = randomWord1 == randomWord2;
-      if (wordsMatch == selectedResult) {
-        score++;
-        questionResult = true;
-      } else {
-        questionResult = false;
-      }
-
-      generateWordsPair();
-
-      if (counter >= widget.numberOfQuestions - 1) {
-        isGameOver = true;
-      } else {
-        counter++;
-      }
-    });
-  }
+  Game({required this.generateWord, required this.numberOfQuestions});
 
   @override
   Widget build(BuildContext context) {
-    return buildGamePage();
+    return ChangeNotifierProvider(
+      create: (context) => GameModel(
+          generateTheWord: generateWord, numberOfQuestions: numberOfQuestions),
+      child: GameUI(),
+    );
   }
+}
 
-  Widget buildGamePage() {
-    if (!isGameStarted) {
-      return GameStartedPopup(onTap: () {
-        setState(() {
-          isGameStarted = true;
-        });
-      });
-    } else if (isGameOver) {
-      return GameOverPopup(
-          score: score, numberOfQuestions: widget.numberOfQuestions);
-    }
+class GameUI extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<GameModel>(
+      builder: (BuildContext context, GameModel gameModel, Widget? child) {
+        if (!gameModel.isGameStarted) {
+          return GameStartedPopup(onTap: () {
+            gameModel.startGame();
+          });
+        } else if (gameModel.isGameOver) {
+          return GameOverPopup(
+            score: gameModel.score,
+            numberOfQuestions: gameModel.numberOfQuestions,
+          );
+        }
 
-    return QuestionWidget(
-      word: randomWord1!.word,
-      translation: randomWord2!.translation,
-      previousQuestionResult: questionResult,
-      onNoTap: () {
-        checkQuestionResult(false);
-      },
-      onYesTap: () {
-        checkQuestionResult(true);
+        return QuestionWidget(
+          word: gameModel.randomWord1!.word,
+          translation: gameModel.randomWord2!.translation,
+          previousQuestionResult: gameModel.questionResult,
+          onNoTap: () {
+            gameModel.checkQuestionResult(false);
+          },
+          onYesTap: () {
+            gameModel.checkQuestionResult(true);
+          },
+        );
       },
     );
   }
