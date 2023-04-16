@@ -40,22 +40,23 @@ class SunState extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        state,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontFamily: 'Poppins',
-                            color: Colors.white,
-                            fontSize: 20),
-                      ),
+                      Text(state, style: Theme.of(context).textTheme.headline2
+                          // style: const TextStyle(
+                          //     fontWeight: FontWeight.w400,
+                          //     fontFamily: 'Poppins',
+                          //     color: Colors.white,
+                          //     fontSize: 20),
+                          ),
                       Text(
                         time.toString(),
-                        style: const TextStyle(
+                        style: TextStyle(
+                            // Theme.of(context).textTheme.bodyText1
+
                             fontWeight: FontWeight.w700,
                             fontFamily: 'Poppins',
                             color: Color.fromRGBO(234, 184, 69, 1),
                             fontSize: 20),
-                      )
+                      ),
                     ],
                   ),
                 )
