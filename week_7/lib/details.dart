@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class Details extends StatelessWidget {
+class Details extends StatefulWidget {
   final String pressureIcon;
   final String visibilityIcon;
   final String max;
@@ -34,6 +34,11 @@ class Details extends StatelessWidget {
         super(key: key);
 
   @override
+  State<Details> createState() => _DetailsState();
+}
+
+class _DetailsState extends State<Details> {
+  @override
   Widget build(BuildContext context) {
     var happy = 'assets/images/happiness.png';
     var sad = 'assets/images/sad.png';
@@ -56,30 +61,30 @@ class Details extends StatelessWidget {
                 child: DetailsRow(
                     icon: 'assets/images/cold.png',
                     text: 'Min temp: ',
-                    value: this.minTemperature),
+                    value: this.widget.minTemperature),
               ),
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: DetailsRow(
                     icon: 'assets/images/hot.png',
                     text: 'Max temp: ',
-                    value: this.maxTemperature),
+                    value: this.widget.maxTemperature),
               ),
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: DetailsRow(
                     icon: 'assets/images/barometer-.png',
                     text: 'Pressure: ',
-                    value: this.pressureValue),
+                    value: this.widget.pressureValue),
               ),
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: DetailsRow(
                     icon: 'assets/images/eye.png',
                     text: 'Visibility: ',
-                    value: this.visibilityValue),
+                    value: this.widget.visibilityValue),
               ),
-              showMood
+              widget.showMood
                   ? Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Row(
@@ -115,13 +120,45 @@ class DetailsArguments {
   });
 }
 
-class DetailsRow extends StatelessWidget {
-  String icon;
-  String text;
-  String value;
+class DetailsRow extends StatefulWidget {
+  final String icon;
+  final String text;
+  final String value;
+
   DetailsRow(
       {Key? key, required this.icon, required this.text, required this.value})
       : super(key: key);
+
+  @override
+  _DetailsRowState createState() => _DetailsRowState();
+}
+
+class _DetailsRowState extends State<DetailsRow>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fontSizeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    );
+
+    _fontSizeAnimation = Tween<double>(begin: 18, end: 24).animate(
+      CurvedAnimation(
+          parent: _animationController, curve: Curves.easeInOutBack),
+    );
+  }
+
+  void _onTap() {
+    if (_animationController.status == AnimationStatus.completed) {
+      _animationController.reverse();
+    } else if (_animationController.status == AnimationStatus.dismissed) {
+      _animationController.forward();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,22 +168,31 @@ class DetailsRow extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.asset(icon, height: 90, width: 80),
+              GestureDetector(
+                onTap: _onTap,
+                child: RotationTransition(
+                  turns: _animationController,
+                  child: Image.asset(widget.icon, height: 90, width: 80),
+                ),
+              ),
             ],
           ),
           Expanded(
             flex: 2,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                text,
-                style: const TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontFamily: 'Poppins',
-                    color: Colors.white,
-                    fontSize: 20),
-              ),
-            ),
+                padding: EdgeInsets.all(16.0),
+                child: AnimatedBuilder(
+                    animation: _fontSizeAnimation,
+                    builder: (context, child) {
+                      return Text(
+                        widget.text,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Poppins',
+                            color: Colors.white,
+                            fontSize: _fontSizeAnimation.value),
+                      );
+                    })),
           ),
           const SizedBox(
             width: 15,
@@ -157,7 +203,7 @@ class DetailsRow extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  value,
+                  widget.value,
                   style: const TextStyle(
                       fontWeight: FontWeight.w400,
                       fontFamily: 'Poppins',

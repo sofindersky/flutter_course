@@ -69,6 +69,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   WeatherApiClient client = WeatherApiClient();
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   bool? happyStatus;
 
@@ -118,96 +119,98 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: GestureDetector(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              '/details',
-                              arguments: DetailsArguments(
-                                maxTemperature: "${tempMax}",
-                                minTemperature: "${tempMin}",
-                                visibilityValue: "${visibility}",
-                                pressureValue: "${pressure}",
-                              ),
-                            ),
-                            child: WeatherTile(
-                              location: "${snapshot.data?.name}",
-                              temperature: temp?.toString() ?? '--',
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(0.5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Container(
-                                width: 330,
-                                child: Row(
-                                  children: [
-                                    HorizontalTile(
-                                      number: "${snapshot.data?.wind?.speed}",
-                                      conditions: 'km/h',
-                                      measurements: 'Wind',
-                                    ),
-                                    HorizontalTile(
-                                      number:
-                                          "${snapshot.data?.main?.humidity}",
-                                      conditions: '%',
-                                      measurements: 'Humidity',
-                                    ),
-                                    HorizontalTile(
-                                      number: feelsLike?.toString() ?? '--',
-                                      conditions: '°',
-                                      measurements: 'Feels Like',
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SunState(
-                            icon: 'assets/images/sunrise.png',
-                            time: formattedsunriseTime ?? '--',
-                            state: "Sunrise"),
-                        SunState(
-                            icon: 'assets/images/sunset (1).png',
-                            time: formattedsunsetTime ?? '--',
-                            state: "Sunset"),
-                        GestureDetector(
-                          onTap: () async {
-                            bool? result = await Navigator.push(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: GestureDetector(
+                              onTap: () => Navigator.pushNamed(
                                 context,
-                                MaterialPageRoute(
-                                    builder: (_) => Details(
-                                        visibilityValue: "${visibility}",
-                                        pressureValue: "${pressure}",
-                                        maxTemperature: "${tempMax}",
-                                        minTemperature: "${tempMin}",
-                                        showMood: true)));
-
-                            if (result != null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(result
-                                      ? 'You are happy with weather 😀'
-                                      : 'You are not happy with weather 🙁'),
-                                  duration: Duration(seconds: 3),
+                                '/details',
+                                arguments: DetailsArguments(
+                                  maxTemperature: "${tempMax}",
+                                  minTemperature: "${tempMin}",
+                                  visibilityValue: "${visibility}",
+                                  pressureValue: "${pressure}",
                                 ),
-                              );
-                            }
-                          },
-                          child: DescriptionWidget(
-                              description:
-                                  "${snapshot.data?.weather?[0].description}",
-                              main: "${snapshot.data?.weather?[0].main}"),
-                        )
-                      ],
+                              ),
+                              child: WeatherTile(
+                                location: "${snapshot.data?.name}",
+                                temperature: temp?.toString() ?? '--',
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(0.5),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Container(
+                                  width: 330,
+                                  child: Row(
+                                    children: [
+                                      HorizontalTile(
+                                        number: "${snapshot.data?.wind?.speed}",
+                                        conditions: 'km/h',
+                                        measurements: 'Wind',
+                                      ),
+                                      HorizontalTile(
+                                        number:
+                                            "${snapshot.data?.main?.humidity}",
+                                        conditions: '%',
+                                        measurements: 'Humidity',
+                                      ),
+                                      HorizontalTile(
+                                        number: feelsLike?.toString() ?? '--',
+                                        conditions: '°',
+                                        measurements: 'Feels Like',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SunState(
+                              icon: 'assets/images/sunrise.png',
+                              time: formattedsunriseTime ?? '--',
+                              state: "Sunrise"),
+                          SunState(
+                              icon: 'assets/images/sunset (1).png',
+                              time: formattedsunsetTime ?? '--',
+                              state: "Sunset"),
+                          GestureDetector(
+                            onTap: () async {
+                              bool? result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => Details(
+                                          visibilityValue: "${visibility}",
+                                          pressureValue: "${pressure}",
+                                          maxTemperature: "${tempMax}",
+                                          minTemperature: "${tempMin}",
+                                          showMood: true)));
+
+                              if (result != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(result
+                                        ? 'You are happy with weather 😀'
+                                        : 'You are not happy with weather 🙁'),
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                              }
+                            },
+                            child: DescriptionWidget(
+                                description:
+                                    "${snapshot.data?.weather?[0].description}",
+                                main: "${snapshot.data?.weather?[0].main}"),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
